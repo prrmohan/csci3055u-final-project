@@ -22,9 +22,11 @@ class Subscriber(name: String) extends Actor with ActorLogging {
   def receive = {
     // Fluff
     case 1 => println("Hello %s! You are joining the chat. Please enter -e to exit.".format(name))
+    case 5 => context.stop(self)
     // Print out message received
     case s: String =>
       println("Received!")
+      Thread.sleep(1)
       println(s)
     case SubscribeAck(Subscribe(content, None, `self`)) =>
       println("subscribing to %s".format(content))

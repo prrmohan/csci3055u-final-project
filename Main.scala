@@ -39,5 +39,8 @@ object Main {
       val pub2 = sys.actorOf(Props[Publisher], "publisher")
       pub2 ! "comet_stats.csv" // send filename for comet information
     }
+    val c = Cluster.get(sys)
+    Cluster(sys).leave(address) // exit code
+    println(Cluster(sys).isTerminated)
   }
 }

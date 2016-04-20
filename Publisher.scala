@@ -16,7 +16,17 @@ class Publisher extends Actor {
           val columns = line.split(",").map(_.trim)
             // Strictly using Publisher to send data from file
             // This is acting as our mock datacenter for now
-            mediator ! Publish("content", s"${columns(0)}|${columns(3)}|${columns(6)}|${columns(9)}")
+            if(s.contains("comet"))
+            {
+              mediator ! Publish("content", s"${columns(0)}|${columns(3)}|${columns(6)}|${columns(9)}")
+            }
+            else
+            {
+              // Columns don't match for both files
+              mediator ! Publish("content", s"${columns(0)}|${columns(3)}|${columns(6)}}")
+            }
+          mediator ! 5
+          context.stop(self)  //exit code (shut actor down)
         }
   }
 }
