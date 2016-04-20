@@ -8,11 +8,10 @@ import akka.cluster.Cluster
 //    distributed pub-sub model
 object Main {
   def main(args: Array[String]): Unit = {
-    val sysName = "myConvo"
+    val sysName = "mySub"
     
-    // Join a specific cluster
+    // create address with host name "mySub"
     val sys = ActorSystem(sysName)
-    val address = Cluster(sys).selfAddress
     
     //fluff
     println("What is your name?")
@@ -39,8 +38,5 @@ object Main {
       val pub2 = sys.actorOf(Props[Publisher], "publisher")
       pub2 ! "comet_stats.csv" // send filename for comet information
     }
-    val c = Cluster.get(sys)
-    Cluster(sys).leave(address) // exit code
-    println(Cluster(sys).isTerminated)
   }
 }
