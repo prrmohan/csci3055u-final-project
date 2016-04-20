@@ -4,7 +4,6 @@ import akka.actor.Actor
 import akka.actor.Props
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import akka.cluster.pubsub.DistributedPubSub
-import hackernews4s.v0.Item
 
 class Publisher extends Actor {  
   val mediator = DistributedPubSub(context.system).mediator 
