@@ -4,48 +4,40 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.cluster.Cluster
 
+// Demonstrates a publisher-subscriber model using akka's
+//    distributed pub-sub model
 object Main {
   def main(args: Array[String]): Unit = {
     val sysName = "myConvo"
+    
+    // Join a specific cluster
     val sys = ActorSystem(sysName)
     val address = Cluster(sys).selfAddress
+    
+    //fluff
     println("What is your name?")
     val name = scala.io.StdIn.readLine()
-    sys.actorOf(Props[Listener], "memberListener")
-    val sub1 = sys.actorOf(Props(new Subscriber(name)), name)
-    sub1 ! 1
-        
-    val sys2 = ActorSystem(sysName)
-    Cluster(sys2).join(address)
-    println("Enter your name:")
-    val name2 = scala.io.StdIn.readLine()
-    val sub2 = sys2.actorOf(Props(new Subscriber(name2)), name2)
-    sub2 ! 1
     
-    val sys3 = ActorSystem(sysName)
-    Cluster(sys3).join(address)
-    println("Enter your name:")
-    val name3 = scala.io.StdIn.readLine()
-    val sub3 = sys3.actorOf(Props(new Subscriber(name3)), name3)
-    sub3 ! 1
-    sub3 ! "test"
-    sub2 ! "test1"
-    sub2 ! "yes"
-    sub2 ! "hello"
-    
-    var exit = false
-    while(!exit)
+    // For this test I'm using part of NASA's data
+    //    in this case the uesr can either
+    //    subscribe to get news about 'meteorites'
+    //    or get news about 'comets'
+    println("Enter 1 for meteorites or 2 for comets!")
+    val response = scala.io.StdIn.readLine()
+    if(response == "1")
     {
-      val msg = scala.io.StdIn.readLine()
-      if(msg == "-e")
-      {
-        exit = true
-      }
-      else
-      {
-        sub1 ! msg
-      }      
+      val sub1 = sys.actorOf(Props(new Subscriber(name)), name)
+      sub1 ! 1
+      
+      val pub = sys.actorOf(Props[Publisher], "publisher")    
+      pub ! "Meteorite_Landings.csv"  // send filename for meteorite information
     }
-   sys.shutdown()
+    else
+    {
+      val sub2 = sys.actorOf(Props(new Subscriber(name)), name)
+      
+      val pub2 = sys.actorOf(Props[Publisher], "publisher")
+      pub2 ! "comet_stats.csv" // send filename for comet information
+    }
   }
 }

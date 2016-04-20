@@ -2,28 +2,21 @@ package publish
 
 import akka.actor.Actor
 import akka.actor.Props
-import akka.cluster.pubsub.DistributedPubSubMediator.{Publish, Subscribe}
+import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import akka.cluster.pubsub.DistributedPubSub
+import hackernews4s.v0.Item
 
-object Publisher {
-  def props(name: String): Props = Props(classOf[Publisher], name)
-  
-  case class Publish(message: String)
-  case class Message(from: String, txt: String)
-}
+class Publisher extends Actor {  
+  val mediator = DistributedPubSub(context.system).mediator 
 
-class Publisher(name: String) extends Actor {  
-  val mediator = DistributedPubSub(context.system).mediator
-  val group = "chat"
-  mediator ! Subscribe(group, self)
-  println(s"$name joined chat.")
-  
-  def receive = {
-    case Publisher.Publish(message) =>
-      mediator ! Publish(group, Publisher.Message(name, message))
-      
-    case Publisher.Message(from, txt) =>
-      val dir = if(sender == self) " >>> " else s" << $from:"
-      println(s"$name $dir $txt")
-  } 
+    def receive = {
+      case s: String =>
+        val bFR = io.Source.fromFile(s)
+        for (line <- bFR.getLines) {
+          val columns = line.split(",").map(_.trim)
+            // Strictly using Publisher to send data from file
+            // This is acting as our mock datacenter for now
+            mediator ! Publish("content", s"${columns(0)}|${columns(3)}|${columns(6)}|${columns(9)}")
+        }
+  }
 }
